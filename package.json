@@ -1,0 +1,16 @@
+{
+  "name": "drive-nano-categorizer",
+  "version": "1.0.0",
+  "description": "Privacy-first Google Drive root file categorizer and summarizer powered by Chrome Built-in AI (Gemini Nano)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "private": true
+}

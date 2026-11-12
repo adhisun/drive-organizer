@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <base target="_top" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f6f9;
+      color: #111827;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #dde3ec;
+      border-radius: 14px;
+      padding: 28px 24px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+    .badge {
+      display: inline-block;
+      background: #dcfce7;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    p {
+      margin: 0 0 20px;
+      color: #475569;
+      font-size: 13.5px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      background: #1a56db;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      transition: background 0.15s ease;
+    }
+    .btn:hover {
+      background: #1e429f;
+    }
+    .btn.hidden {
+      display: none;
+    }
+    .error {
+      color: #991b1b;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span id="statusPill" class="badge">Google OAuth Approved</span>
+    <h1 id="headingText">Connecting to Local Categorizer…</h1>
+    <p id="subText">Preparing your Google Drive session…</p>
+    <a id="continueLink" class="btn hidden" target="_top" href="#">
+      Finish Sign-In &amp; Return to App →
+    </a>
+    <div id="errorBox" class="error" style="display: none;"></div>
+  </div>
+
+  <script>
+    (function initBridge() {
+      var heading = document.getElementById('headingText');
+      var subText = document.getElementById('subText');
+      var continueLink = document.getElementById('continueLink');
+      var errorBox = document.getElementById('errorBox');
+      var statusPill = document.getElementById('statusPill');
+
+      function showError(msg) {
+        statusPill.style.background = '#fee2e2';
+        statusPill.style.color = '#991b1b';
+        statusPill.textContent = 'Connection Error';
+        heading.textContent = 'Unable to complete sign-in';
+        subText.textContent = '';
+        errorBox.style.display = 'block';
+        errorBox.textContent = msg;
+      }
+
+      if (!window.google || !google.script || !google.script.url) {
+        showError('This page must be opened via its deployed Google Apps Script Web App URL.');
+        return;
+      }
+
+      google.script.url.getLocation(function (location) {
+        var params = (location && location.parameter) || {};
+        var returnTo = params.return_to || '';
+        var state = params.state || '';
+        var popup = params.popup || '';
+
+        google.script.run
+          .withSuccessHandler(function (payload) {
+            var identityLabel = payload.email || payload.displayName || '';
+            heading.textContent = 'Almost Done — One Click to Finish';
+            subText.textContent = identityLabel
+              ? 'Authorized as ' + identityLabel + '. Click below to finish signing into your local Drive Nano Categorizer.'
+              : 'Click below to finish signing into your local Drive Nano Categorizer.';
+
+            continueLink.href = payload.callbackUrl;
+            continueLink.textContent = identityLabel
+              ? 'Continue as ' + identityLabel + ' →'
+              : 'Continue to Drive Nano Categorizer →';
+            continueLink.classList.remove('hidden');
+          })
+          .withFailureHandler(function (err) {
+            showError((err && err.message) || String(err));
+          })
+          .getBridgeAuthPayload(returnTo, state, popup);
+      });
+    })();
+  </script>
+</body>
+</html>

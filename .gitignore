@@ -1,0 +1,6 @@
+.env
+.env.local
+.clasp.json
+node_modules/
+.DS_Store
+Thumbs.db
